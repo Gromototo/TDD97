@@ -2,8 +2,8 @@
 #welcomeContainer {
   margin: auto;
   width: 600px;
-  height: 500px;
-
+  height: 400px;
+  column-gap: 10px;
   display: grid;
   grid-template-columns: 340px 250px;
   border: 5px solid gray;
@@ -11,13 +11,17 @@
 
 #forms {
   display: grid;
+  row-gap: 10px;
   grid-template-rows: 100px 400px;
+    border: 5px solid red;
+
 }
 
+#forms div {
+    border: 5px solid blue;
+}
 #signupDiv {
   display: grid;
-  grid-template-columns:fit-content(100%);
-  border: 5px solid red;
 }
 
 .formLabelInput {
