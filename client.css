@@ -6,25 +6,17 @@
   column-gap: 10px;
   display: grid;
   grid-template-columns: 340px 250px;
-  border: 5px solid gray;
+  border: 1px solid gray;
 }
 
 #forms {
   display: grid;
   row-gap: 10px;
   grid-template-rows: 100px 400px;
-    border: 5px solid red;
-
+  height: 100%;
+  overflow: auto;
 }
 
-#forms div {
-    border: 5px solid blue;
+#forms > div {
+    border: 1px solid gray;
 }
-#signupDiv {
-  display: grid;
-}
-
-.formLabelInput {
-  border: 1px solid black;
-}
-
