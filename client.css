@@ -20,3 +20,13 @@
 #forms > div {
     border: 1px solid gray;
 }
+
+.formLabelInput {
+  display: grid;
+  grid-template-columns: 40% auto;
+  grid-template-rows: auto;
+}
+
+.submitButton {
+  float: right;
+}
