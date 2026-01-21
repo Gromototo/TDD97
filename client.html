@@ -3,70 +3,23 @@
 <head></head>
   <link rel="stylesheet" type="text/css" href="client.css">
 </head>
-<body>
-<div id="welcomeContainer">
-  <div>
-    <img  id = "welcomeLogo" src="wimage.png" alt="twidder logo with text Twidder socialize woth other people around the world" width="340" height="400">
-  </div>
-  <div id="forms">
-    <div id="login" >
-      <form >
-        <div class="formLabelInput">
-        <label for="email">email</label>
-        <input type="text" id="email" name="email">
-        </div>
-        <div class="formLabelInput">
-        <label for="password">password</label>
-        <input type="text" id="password" name="password">
-        </div>
-        <input class= "submitButton"type="submit"  value="Submit">
-      </form>
-    </div>
-    <div id="signupDiv">
-      <div id = "signupLabel">
-        <label  for="signup">signup here</label>
-      </div>
-      <form id="signup">
-        <div class="formLabelInput">
-        <span for="email">email</span>
-        <input type="text" id="email" name="email">
-        </div>
-        <div class="formLabelInput">
-        <span for="password">password</span>
-        <input type="text" id="password" name="password">
-        </div>
-        <div class="formLabelInput">
-        <label for="passwordConfirmation">confirm password</label>
-        <input type="text" id="passwordConfirmation" name="passwordConfirmation">
-        </div>
-        <div class="formLabelInput">
-        <label for="firstName">firstName</label>
-        <input type="text" id="firstName" name="firstName">
-        </div>
-        <div class="formLabelInput">
-        <label for="familyName">familyName</label>
-        <input type="text" id="familyName" name="familyName">
-        </div>
-        <div class="formLabelInput">
-        <label for="cars">Choose a gender:</label>
-        <select name="genders" id="genders">
-          <option value="male">male</option>
-          <option value="female">female</option>
-        </select>
-        </div>
-        <div class="formLabelInput">
-        <label for="city">city</label>
-        <input type="text" id="city" name="city">
-        </div>
-        <div class="formLabelInput">
-                  <label for="country">country</label>
+<script>
+  window.onload = function() {
+    var contentContainer = document.getElementById('viewContainer');
+    fetch('welcomeView/welcome.html')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
 
-        <input type="text" id="country" name="country">
-        </div>
-        <input class="submitButton" type="submit"  value="Submit">
-      </form>
-    </div>
-  </div>
-</div>
+      return response.text();
+    })
+    .then(data => {
+      contentContainer.innerHTML = data;
+    })
+  }
+</script>
+<body>
+  <div id="viewContainer"></div>
 </body>
 </html>
