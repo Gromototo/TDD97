@@ -11,10 +11,6 @@ body {
   grid-template-columns: 340px 250px;
 }
 
-#login {
-  margin-top: 20px;
-}
-
 #forms {
   display: grid;
   row-gap: 10px;
@@ -28,6 +24,8 @@ body {
 #forms > div, #welcomeLogo {
     border: 0px solid black;
     background-color: white;
+    display: grid;
+    place-items: center;
 }
 
 .formLabelInput {
@@ -43,11 +41,17 @@ body {
 }
 
 #signupLabel {
-  text-align: center;
+  display: grid;
+  place-items: center;
   font-weight: bold;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  width: 100%;
+  height: 100%;
 }
 .submitButton {
   float: right;
+}
+
+#signupDiv {
+  display: grid;
+  grid-template-rows: 20% 80%;
 }
