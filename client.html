@@ -13,11 +13,11 @@
       <form >
         <div class="formLabelInput">
         <label for="email">email</label>
-        <input type="text" id="email" name="email">
+        <input type="email" id="email" name="email" required>
         </div>
         <div class="formLabelInput">
         <label for="password">password</label>
-        <input type="text" id="password" name="password">
+        <input type="text" minlength="10" id="password" name="password" required>
         </div>
         <input class= "submitButton"type="submit"  value="Submit">
       </form>
@@ -29,39 +29,39 @@
       <form id="signup">
         <div class="formLabelInput">
         <span for="email">email</span>
-        <input type="text" id="email" name="email">
+        <input type="email" id="email" name="email" required>
         </div>
         <div class="formLabelInput">
         <span for="password">password</span>
-        <input type="text" id="password" name="password">
+        <input type="text" minlength="10" id="password" name="password" required>
         </div>
         <div class="formLabelInput">
         <label for="passwordConfirmation">confirm password</label>
-        <input type="text" id="passwordConfirmation" name="passwordConfirmation">
+        <input type="text" minlength="10" id="passwordConfirmation" name="passwordConfirmation" required>
         </div>
         <div class="formLabelInput">
         <label for="firstName">firstName</label>
-        <input type="text" id="firstName" name="firstName">
+        <input type="text" id="firstName" name="firstName" required>
         </div>
         <div class="formLabelInput">
         <label for="familyName">familyName</label>
-        <input type="text" id="familyName" name="familyName">
+        <input type="text" id="familyName" name="familyName" required>
         </div>
         <div class="formLabelInput">
         <label for="cars">Choose a gender:</label>
-        <select name="genders" id="genders">
+        <select name="genders" id="genders" required>
           <option value="male">male</option>
           <option value="female">female</option>
         </select>
         </div>
         <div class="formLabelInput">
         <label for="city">city</label>
-        <input type="text" id="city" name="city">
+        <input type="text" id="city" name="city" required>
         </div>
         <div class="formLabelInput">
                   <label for="country">country</label>
 
-        <input type="text" id="country" name="country">
+        <input type="text" id="country" name="country" required>
         </div>
         <input class="submitButton" type="submit"  value="Submit">
       </form>
