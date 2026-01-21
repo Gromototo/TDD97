@@ -2,6 +2,7 @@
 <html>
 <head></head>
   <link rel="stylesheet" type="text/css" href="client.css">
+  <script src="client.js"></script>
 </head>
 <script id="welcomeView" type="text/html">
   <div id="welcomeContainer">
@@ -33,11 +34,11 @@
         </div>
         <div class="formLabelInput">
         <span for="password">password</span>
-        <input type="text" minlength="10" id="password" name="password" required>
+        <input type="text" minlength="10" id="signup_password" name="password" required>
         </div>
         <div class="formLabelInput">
-        <label for="passwordConfirmation">confirm password</label>
-        <input type="text" minlength="10" id="passwordConfirmation" name="passwordConfirmation" required>
+        <label for="signup_passwordConfirmation">confirm password</label>
+        <input type="text" minlength="10"  oninput="validatePassword()" id="signup_passwordConfirmation" name="passwordConfirmation" required>
         </div>
         <div class="formLabelInput">
         <label for="firstName">firstName</label>
