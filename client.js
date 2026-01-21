@@ -8,3 +8,16 @@ function validatePassword() {
     passwordConfirmation.setCustomValidity("");
   }
 }
+
+function signUpHandler(inputObject) {
+  var signup = serverstub.signUp(inputObject);
+  console.log(signup);
+  if (!signup.success) {
+    var submitButton = document.querySelector("#signup .submitButton");
+    submitButton.setCustomValidity(signup.message)
+    submitButton.reportValidity();
+  }
+  else {
+    submitButton.setCustomValidity("");
+  }
+}

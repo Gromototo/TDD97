@@ -3,6 +3,7 @@
 <head></head>
   <link rel="stylesheet" type="text/css" href="client.css">
   <script src="client.js"></script>
+  <script src="serverstub.js"></script>
 </head>
 <script id="welcomeView" type="text/html">
   <div id="welcomeContainer">
@@ -27,13 +28,13 @@
       <div id = "signupLabel">
         <label  for="signup">signup here</label>
       </div>
-      <form id="signup">
+      <form id="signup" onsubmit="signUpHandler({email: this.email.value, password: this.password.value, firstname: this.firstName.value, familyname: this.familyName.value, gender: this.genders.value, city: this.city.value, country: this.country.value}); return false;">
         <div class="formLabelInput">
-        <span for="email">email</span>
-        <input type="email" id="email" name="email" required>
+        <label for="signup_email">email</label>
+        <input type="email" id="signup_email" name="email" required>
         </div>
         <div class="formLabelInput">
-        <span for="password">password</span>
+        <label for="password">password</label>
         <input type="text" minlength="10" id="signup_password" name="password" required>
         </div>
         <div class="formLabelInput">
