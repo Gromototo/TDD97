@@ -17,7 +17,4 @@ function signUpHandler(inputObject) {
     submitButton.setCustomValidity(signup.message)
     submitButton.reportValidity();
   }
-  else {
-    submitButton.setCustomValidity("");
-  }
 }

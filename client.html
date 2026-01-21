@@ -28,7 +28,7 @@
       <div id = "signupLabel">
         <label  for="signup">signup here</label>
       </div>
-      <form id="signup" onsubmit="signUpHandler({email: this.email.value, password: this.password.value, firstname: this.firstName.value, familyname: this.familyName.value, gender: this.genders.value, city: this.city.value, country: this.country.value}); return false;">
+      <form id="signup" oninput="this.querySelector('.submitButton').setCustomValidity('')" onsubmit="signUpHandler({email: this.email.value, password: this.password.value, firstname: this.firstName.value, familyname: this.familyName.value, gender: this.genders.value, city: this.city.value, country: this.country.value}); return false;">
         <div class="formLabelInput">
         <label for="signup_email">email</label>
         <input type="email" id="signup_email" name="email" required>
@@ -71,6 +71,10 @@
   </div>
 </div>
 </script>
+<script id="welcomeView" type="text/html">
+  <p>LOGGED IN</p>
+</div>
+</script>
 <script>
   function refreshView(viewId, content) {
     const viewContainer = document.getElementById('viewContainer');
@@ -81,6 +85,7 @@
     const welcomeViewTemplate = document.getElementById('welcomeView').innerHTML;
     refreshView('viewContainer', welcomeViewTemplate);
   };
+  
 </script>
 <body>
   <div id="viewContainer"></div>
