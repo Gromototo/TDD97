@@ -3,8 +3,8 @@
 <head></head>
   <link rel="stylesheet" type="text/css" href="client.css">
 </head>
-<body>
-<div id="welcomeContainer">
+<script id="welcomeView" type="text/html">
+  <div id="welcomeContainer">
   <div>
     <img  id = "welcomeLogo" src="wimage.png" alt="twidder logo with text Twidder socialize woth other people around the world" width="340" height="400">
   </div>
@@ -68,5 +68,19 @@
     </div>
   </div>
 </div>
+</script>
+<script>
+  function refreshView(viewId, content) {
+    const viewContainer = document.getElementById('viewContainer');
+    viewContainer.innerHTML = content;
+  }
+
+  window.onload = function() {
+    const welcomeViewTemplate = document.getElementById('welcomeView').innerHTML;
+    refreshView('viewContainer', welcomeViewTemplate);
+  };
+</script>
+<body>
+  <div id="viewContainer"></div>
 </body>
 </html>
