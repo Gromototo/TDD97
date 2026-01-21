@@ -9,6 +9,7 @@ body {
   column-gap: 10px;
   display: grid;
   grid-template-columns: 340px 250px;
+  margin-top: 10%;
 }
 
 #forms {
