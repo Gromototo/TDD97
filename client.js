@@ -17,4 +17,22 @@ function signUpHandler(inputObject) {
     submitButton.setCustomValidity(signup.message)
     submitButton.reportValidity();
   }
+  else {
+    var login = serverstub.signIn(inputObject.email, inputObject.password);
+    localStorage.setItem("token", login.data);
+    synchronizeView();
+  }
+}
+
+function signInHandler(inputObject) {
+  var response = serverstub.signIn(inputObject.email, inputObject.password);
+  
+  if (!response.success) {
+    var submitButton = document.querySelector("#login .submitButton");
+    submitButton.setCustomValidity(response.message);
+    submitButton.reportValidity();
+  } else {
+    localStorage.setItem("token", response.data);
+    synchronizeView();
+  }
 }
