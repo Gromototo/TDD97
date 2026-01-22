@@ -102,9 +102,25 @@
 </script>
 <script id="accountView" type="text/html">
     <p>accountView</p>
+    <div id="changePasword" >
+      <form oninput="this.querySelector('.submitButton').setCustomValidity('')" onsubmit="changePasswordHandler({token : localStorage.getItem('token'), password: this.password.value, oldPassword: this.oldPassword.value}); return false;">
+        <div class="formLabelInput">
+        <label for="password">current password</label>
+        <input type="password" id="password" minlength="10" name="password" required>
+        </div>
+        <div class="formLabelInput">
+        <label for="oldPassword">old password</label>
+        <input type="password" minlength="10" id="oldPassword" name="oldPassword" required>
+        </div>
+        <input class= "submitButton" type="submit"  value="Submit">
+      </form>
+    </div>
+    
 </script>
+
 <body>
   <div id="headerContainer"></div>
   <div id="viewContainer"></div>
 </body>
+
 </html>

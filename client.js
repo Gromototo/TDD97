@@ -37,33 +37,45 @@ function signInHandler(inputObject) {
   }
 }
 
-  function refreshView(viewId, content) {
-    const container = document.getElementById(viewId);
-    container.innerHTML = content;
+function changePasswordHandler(inputObject) {
+  var response = serverstub.changePassword(inputObject.token, inputObject.password, inputObject.oldPassword);
+  console.log(response);
+  if (response.success) {
+     document.querySelector("#changePasword form").reset();
   }
 
-  function getActiveTab() {
-    const headerContainer = document.getElementById('headerContainer');
-    const selectedTab = headerContainer.querySelector("input[type='radio']:checked");
-    const activeTab = selectedTab ? selectedTab.value : "homeView";
-    console.log(activeTab);
-    return activeTab;
-  }
+  var submitButton = document.querySelector("#changePasword .submitButton");
+  submitButton.setCustomValidity(response.message);
+  submitButton.reportValidity();
+}
 
-  function synchronizeView() {
-    const token = localStorage.getItem("token");
-    const isLoggedIn = token && serverstub.getUserDataByToken(token).success;
+function refreshView(viewId, content) {
+  const container = document.getElementById(viewId);
+  container.innerHTML = content;
+}
 
-    if (isLoggedIn) {
-      if (document.getElementById("headerContainer").innerHTML === "") {
-        const content = document.getElementById('headerView').innerHTML;
-        refreshView('headerContainer', content);
-      }
-    } else {
-      document.getElementById("headerContainer").innerHTML = "";
+function getActiveTab() {
+  const headerContainer = document.getElementById('headerContainer');
+  const selectedTab = headerContainer.querySelector("input[type='radio']:checked");
+  const activeTab = selectedTab ? selectedTab.value : "homeView";
+  console.log(activeTab);
+  return activeTab;
+}
+
+function synchronizeView() {
+  const token = localStorage.getItem("token");
+  const isLoggedIn = token && serverstub.getUserDataByToken(token).success;
+
+  if (isLoggedIn) {
+    if (document.getElementById("headerContainer").innerHTML === "") {
+      const content = document.getElementById('headerView').innerHTML;
+      refreshView('headerContainer', content);
     }
+  } else {
+    document.getElementById("headerContainer").innerHTML = "";
+  }
 
-    const viewId = isLoggedIn ? getActiveTab() : 'welcomeView';
-    const content = document.getElementById(viewId).innerHTML;
-    refreshView('viewContainer', content);
-  };
+  const viewId = isLoggedIn ? getActiveTab() : 'welcomeView';
+  const content = document.getElementById(viewId).innerHTML;
+  refreshView('viewContainer', content);
+}
