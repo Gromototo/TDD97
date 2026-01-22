@@ -36,3 +36,34 @@ function signInHandler(inputObject) {
     synchronizeView();
   }
 }
+
+  function refreshView(viewId, content) {
+    const container = document.getElementById(viewId);
+    container.innerHTML = content;
+  }
+
+  function getActiveTab() {
+    const headerContainer = document.getElementById('headerContainer');
+    const selectedTab = headerContainer.querySelector("input[type='radio']:checked");
+    const activeTab = selectedTab ? selectedTab.value : "homeView";
+    console.log(activeTab);
+    return activeTab;
+  }
+
+  function synchronizeView() {
+    const token = localStorage.getItem("token");
+    const isLoggedIn = token && serverstub.getUserDataByToken(token).success;
+
+    if (isLoggedIn) {
+      if (document.getElementById("headerContainer").innerHTML === "") {
+        const content = document.getElementById('headerView').innerHTML;
+        refreshView('headerContainer', content);
+      }
+    } else {
+      document.getElementById("headerContainer").innerHTML = "";
+    }
+
+    const viewId = isLoggedIn ? getActiveTab() : 'welcomeView';
+    const content = document.getElementById(viewId).innerHTML;
+    refreshView('viewContainer', content);
+  };

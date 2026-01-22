@@ -5,6 +5,9 @@
   <script src="client.js"></script>
   <script src="serverstub.js"></script>
 </head>
+<script>
+  window.onload = synchronizeView;
+</script>
 <script id="welcomeView" type="text/html">
   <div id="welcomeContainer">
   <div>
@@ -71,28 +74,37 @@
   </div>
 </div>
 </script>
-<script id="loggedInView" type="text/html">
-  <p>LOGGED IN</p>
-</div>
+<script id="headerView" type="text/html">
+    <div>
+      <fieldset>
+        <div>
+          <input type="radio" id="home" name="tab" value="homeView" onclick="synchronizeView()" checked="checked"/>
+          <label for="home">Home</label>
+        </div>
+
+        <div>
+          <input type="radio" id="browse" name="tab" value="browseView" onclick="synchronizeView()" />
+          <label for="browse">Browse</label>
+        </div>
+
+        <div>
+          <input type="radio" id="account" name="tab" value="accountView" onclick="synchronizeView()" />
+          <label for="account">Account</label>
+        </div>
+      </fieldset>
+  </div>
 </script>
-<script>
-  function refreshView(viewId, content) {
-    const viewContainer = document.getElementById('viewContainer');
-    viewContainer.innerHTML = content;
-  }
-
-  function synchronizeView() {
-    const token = localStorage.getItem("token");
-    const isLoggedIn = token && serverstub.getUserDataByToken(token).success;
-    const viewId = isLoggedIn ? 'loggedInView' : 'welcomeView';
-    const content = document.getElementById(viewId).innerHTML;
-    refreshView('viewContainer', content);
-  };
-
-  window.onload = synchronizeView;
-  
+<script id="homeView" type="text/html">
+  <p>HomeView</p>
+</script>
+<script id="browseView" type="text/html">
+    <p>browseView</p>
+</script>
+<script id="accountView" type="text/html">
+    <p>accountView</p>
 </script>
 <body>
+  <div id="headerContainer"></div>
   <div id="viewContainer"></div>
 </body>
 </html>
