@@ -11,7 +11,6 @@ function validatePassword() {
 
 function signUpHandler(inputObject) {
   var signup = serverstub.signUp(inputObject);
-  console.log(signup);
   if (!signup.success) {
     var submitButton = document.querySelector("#signup .submitButton");
     submitButton.setCustomValidity(signup.message)
@@ -39,7 +38,6 @@ function signInHandler(inputObject) {
 
 function changePasswordHandler(inputObject) {
   var response = serverstub.changePassword(inputObject.token, inputObject.password, inputObject.oldPassword);
-  console.log(response);
   if (response.success) {
      document.querySelector("#changePasword form").reset();
   }
@@ -47,6 +45,14 @@ function changePasswordHandler(inputObject) {
   var submitButton = document.querySelector("#changePasword .submitButton");
   submitButton.setCustomValidity(response.message);
   submitButton.reportValidity();
+}
+
+function signOutHandler(token) {
+  var response = serverstub.signOut(token);
+  if (response.success) {
+    localStorage.removeItem("token");
+  }
+  synchronizeView();
 }
 
 function refreshView(viewId, content) {
@@ -58,7 +64,6 @@ function getActiveTab() {
   const headerContainer = document.getElementById('headerContainer');
   const selectedTab = headerContainer.querySelector("input[type='radio']:checked");
   const activeTab = selectedTab ? selectedTab.value : "homeView";
-  console.log(activeTab);
   return activeTab;
 }
 

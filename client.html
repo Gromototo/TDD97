@@ -115,7 +115,9 @@
         <input class= "submitButton" type="submit"  value="Submit">
       </form>
     </div>
-    
+    <div id="logoutDiv">
+      <button id="logoutButton" onclick="signOutHandler(localStorage.getItem('token'))">Log out</button>
+    </div>
 </script>
 
 <body>
