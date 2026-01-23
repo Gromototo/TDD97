@@ -73,14 +73,24 @@ function synchronizeView() {
 
   if (isLoggedIn) {
     if (document.getElementById("headerContainer").innerHTML === "") {
-      const content = document.getElementById('headerView').innerHTML;
+      const content = document.getElementById('headerViewTemplate').innerHTML;
       refreshView('headerContainer', content);
     }
+
+    if (!document.getElementById("loggedInView")) {
+      const content = document.getElementById('loggedInViewTemplate').innerHTML;
+      refreshView('viewContainer', content);
+    }
+
+    const activeTab = getActiveTab();
+    const views = ["homeView", "browseView", "accountView"];
+    views.forEach(function(view) {
+        const el = document.getElementById(view);
+        if (el) el.style.display = (view === activeTab) ? "block" : "none";
+    });
   } else {
     document.getElementById("headerContainer").innerHTML = "";
+    const content = document.getElementById('welcomeView').innerHTML;
+    refreshView('viewContainer', content);
   }
-
-  const viewId = isLoggedIn ? getActiveTab() : 'welcomeView';
-  const content = document.getElementById(viewId).innerHTML;
-  refreshView('viewContainer', content);
 }

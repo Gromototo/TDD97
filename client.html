@@ -74,7 +74,7 @@
   </div>
 </div>
 </script>
-<script id="headerView" type="text/html">
+<script id="headerViewTemplate" type="text/html">
     <div>
       <fieldset>
         <div>
@@ -94,30 +94,34 @@
       </fieldset>
   </div>
 </script>
-<script id="homeView" type="text/html">
-  <p>HomeView</p>
-</script>
-<script id="browseView" type="text/html">
-    <p>browseView</p>
-</script>
-<script id="accountView" type="text/html">
-    <p>accountView</p>
-    <div id="changePasword" >
-      <form oninput="this.querySelector('.submitButton').setCustomValidity('')" onsubmit="changePasswordHandler({token : localStorage.getItem('token'), password: this.password.value, oldPassword: this.oldPassword.value}); return false;">
-        <div class="formLabelInput">
-        <label for="password">current password</label>
-        <input type="password" id="password" minlength="10" name="password" required>
-        </div>
-        <div class="formLabelInput">
-        <label for="oldPassword">old password</label>
-        <input type="password" minlength="10" id="oldPassword" name="oldPassword" required>
-        </div>
-        <input class= "submitButton" type="submit"  value="Submit">
-      </form>
+<script id="loggedInViewTemplate" type="text/html">
+  <div id="loggedInView">
+    <div id="homeView">
+      <p>HomeView</p>
     </div>
-    <div id="logoutDiv">
-      <button id="logoutButton" onclick="signOutHandler(localStorage.getItem('token'))">Log out</button>
+    <div id="browseView">
+      <p>browseView</p>
     </div>
+    <div id="accountView">
+      <p>accountView</p>
+      <div id="changePasword" >
+        <form oninput="this.querySelector('.submitButton').setCustomValidity('')" onsubmit="changePasswordHandler({token : localStorage.getItem('token'), password: this.password.value, oldPassword: this.oldPassword.value}); return false;">
+          <div class="formLabelInput">
+          <label for="password">current password</label>
+          <input type="password" id="password" minlength="10" name="password" required>
+          </div>
+          <div class="formLabelInput">
+          <label for="oldPassword">old password</label>
+          <input type="password" minlength="10" id="oldPassword" name="oldPassword" required>
+          </div>
+          <input class= "submitButton" type="submit"  value="Submit">
+        </form>
+      </div>
+      <div id="logoutDiv">
+        <button id="logoutButton" onclick="signOutHandler(localStorage.getItem('token'))">Log out</button>
+      </div>
+    </div>
+  </div>
 </script>
 
 <body>
