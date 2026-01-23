@@ -108,7 +108,18 @@
       </div>
     </div>
     <div id="browseView">
-      <p>browseView</p>
+      <div oninput="document.getElementById('browseSearchButton').setCustomValidity('')">
+        <label for="browseEmail">User email:</label>
+        <input type="email" id="browseEmail" name="browseEmail" required>
+        <button id="browseSearchButton" onclick="handleBrowseSearch()">Search</button>
+      </div>
+      <div id="browseProfile" style="display: none;">
+        <div id="browsePersonalInfo"></div>
+        <div>
+          <button onclick="reloadWall(localStorage.getItem('token'), currentBrowseEmail, 'browseWallMessages')">Reload Wall</button>
+          <div id="browseWallMessages"></div>
+        </div>
+      </div>
     </div>
     <div id="accountView">
       <p>accountView</p>

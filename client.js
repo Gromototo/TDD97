@@ -1,3 +1,5 @@
+currentBrowseEmail = null;
+
 function validatePassword() {
   var password = document.getElementById("signup_password").value;
   var passwordConfirmation = document.getElementById("signup_passwordConfirmation");
@@ -55,12 +57,17 @@ function signOutHandler(token) {
   synchronizeView();
 }
 
-function loadUserData() {
-  const token = localStorage.getItem("token");
-  const response = serverstub.getUserDataByToken(token);
+function loadUserData(token, email, containerId) {
+  const loggedInToken = localStorage.getItem("token");
+  let response;
+  if (email) {
+    response = serverstub.getUserDataByEmail(loggedInToken, email);
+  } else {
+    response = serverstub.getUserDataByToken(token);
+  }
   if (response.success) {
     const user = response.data;
-    const infoContainer = document.getElementById("personalInfo");
+    const infoContainer = document.getElementById(containerId);
     infoContainer.innerHTML = `
       <p>Name: ${user.firstname} ${user.familyname}</p>
       <p>Email: ${user.email}</p>
@@ -68,15 +75,16 @@ function loadUserData() {
       <p>City: ${user.city}</p>
       <p>Country: ${user.country}</p>
     `;
+    return true;
   }
+  return response.message;
 }
 
-function reloadWall() {
-  const token = localStorage.getItem("token");
-  const response = serverstub.getUserMessagesByToken(token);
+function reloadWall(token, email, containerId) {
+  const response = email ? serverstub.getUserMessagesByEmail(token, email) : serverstub.getUserMessagesByToken(token);
   if (response.success) {
     const messages = response.data;
-    const wallContainer = document.getElementById("wallMessages");
+    const wallContainer = document.getElementById(containerId);
     wallContainer.innerHTML = messages.map(msg => `<div><strong>${msg.writer}:</strong> ${msg.content}</div>`).join("");
   }
 }
@@ -89,7 +97,7 @@ function postMessageToWall() {
   const token = localStorage.getItem("token");
   if (serverstub.postMessage(token, content, null).success) {
     input.value = "";
-    reloadWall();
+    reloadWall(token, null, "wallMessages");
   }
 }
 
@@ -118,8 +126,8 @@ function synchronizeView() {
     if (!document.getElementById("loggedInView")) {
       const content = document.getElementById('loggedInViewTemplate').innerHTML;
       refreshView('viewContainer', content);
-      loadUserData();
-      reloadWall();
+      loadUserData(token, null, "personalInfo");
+      reloadWall(token, null, "wallMessages");
     }
 
     const activeTab = getActiveTab();
@@ -132,5 +140,29 @@ function synchronizeView() {
     document.getElementById("headerContainer").innerHTML = "";
     const content = document.getElementById('welcomeView').innerHTML;
     refreshView('viewContainer', content);
+  }
+}
+
+function handleBrowseSearch() {
+  const emailInput = document.getElementById("browseEmail");
+  if (!emailInput.checkValidity()) {
+    emailInput.reportValidity();
+    return;
+  }
+
+  const email = emailInput.value;
+  const resultContainer = document.getElementById("browseProfile");
+  const searchButton = document.getElementById("browseSearchButton");
+
+  const result = loadUserData(null, email, "browsePersonalInfo");
+  if (result === true) {
+    currentBrowseEmail = email;
+    resultContainer.style.display = "block";
+    reloadWall(localStorage.getItem("token"), email, "browseWallMessages");
+    searchButton.setCustomValidity("");
+  } else {
+    resultContainer.style.display = "none";
+    searchButton.setCustomValidity(result);
+    searchButton.reportValidity();
   }
 }
