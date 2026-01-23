@@ -1,8 +1,8 @@
 currentBrowseEmail = null;
 
-function validatePassword() {
-  var password = document.getElementById("signup_password").value;
-  var passwordConfirmation = document.getElementById("signup_passwordConfirmation");
+function validatePasswordMatch(passwordId, confirmationId) {
+  var password = document.getElementById(passwordId).value;
+  var passwordConfirmation = document.getElementById(confirmationId);
   
   if(password != passwordConfirmation.value) {
     passwordConfirmation.setCustomValidity("Passwords do not Match");
@@ -39,7 +39,7 @@ function signInHandler(inputObject) {
 }
 
 function changePasswordHandler(inputObject) {
-  var response = serverstub.changePassword(inputObject.token, inputObject.password, inputObject.oldPassword);
+  var response = serverstub.changePassword(inputObject.token, inputObject.oldPassword, inputObject.newPassword);
   if (response.success) {
      document.querySelector("#changePasword form").reset();
   }

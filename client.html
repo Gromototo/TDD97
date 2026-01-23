@@ -22,7 +22,7 @@
         </div>
         <div class="formLabelInput">
         <label for="password">password</label>
-        <input type="text" minlength="10" id="password" name="password" required>
+        <input type="password" minlength="10" id="password" name="password" required>
         </div>
         <input class= "submitButton"type="submit"  value="Submit">
       </form>
@@ -38,11 +38,11 @@
         </div>
         <div class="formLabelInput">
         <label for="password">password</label>
-        <input type="text" minlength="10" id="signup_password" name="password" required>
+        <input type="password" minlength="10" id="signup_password" name="password" required>
         </div>
         <div class="formLabelInput">
         <label for="signup_passwordConfirmation">confirm password</label>
-        <input type="text" minlength="10"  oninput="validatePassword()" id="signup_passwordConfirmation" name="passwordConfirmation" required>
+        <input type="password" minlength="10"  oninput="validatePasswordMatch('signup_password', 'signup_passwordConfirmation')" id="signup_passwordConfirmation" name="passwordConfirmation" required>
         </div>
         <div class="formLabelInput">
         <label for="firstName">firstName</label>
@@ -124,14 +124,18 @@
     <div id="accountView">
       <p>accountView</p>
       <div id="changePasword" >
-        <form oninput="this.querySelector('.submitButton').setCustomValidity('')" onsubmit="changePasswordHandler({token : localStorage.getItem('token'), password: this.password.value, oldPassword: this.oldPassword.value}); return false;">
+        <form oninput="this.querySelector('.submitButton').setCustomValidity('')" onsubmit="changePasswordHandler({token : localStorage.getItem('token'), oldPassword: this.oldPassword.value, newPassword: this.newPassword.value}); return false;">
           <div class="formLabelInput">
-          <label for="password">current password</label>
-          <input type="password" id="password" minlength="10" name="password" required>
+          <label for="oldPassword">Old password</label>
+          <input type="password" id="oldPassword" minlength="10" name="oldPassword" required>
           </div>
           <div class="formLabelInput">
-          <label for="oldPassword">old password</label>
-          <input type="password" minlength="10" id="oldPassword" name="oldPassword" required>
+          <label for="newPassword">New password</label>
+          <input type="password" minlength="10" id="newPassword" name="newPassword" required>
+          </div>
+          <div class="formLabelInput">
+          <label for="newPasswordRepeat">Repeat new password</label>
+          <input type="password" minlength="10" id="newPasswordRepeat" name="newPasswordRepeat" required oninput="validatePasswordMatch('newPassword', 'newPasswordRepeat')">
           </div>
           <input class= "submitButton" type="submit"  value="Submit">
         </form>
