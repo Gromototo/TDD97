@@ -97,7 +97,15 @@
 <script id="loggedInViewTemplate" type="text/html">
   <div id="loggedInView">
     <div id="homeView">
-      <p>HomeView</p>
+      <div id="personalInfo"></div>
+      <div>
+        <textarea id="messageInput" placeholder="Write on your wall..."></textarea>
+        <button onclick="postMessageToWall()">Post</button>
+      </div>
+      <div>
+        <button onclick="reloadWall()">Reload Wall</button>
+        <div id="wallMessages"></div>
+      </div>
     </div>
     <div id="browseView">
       <p>browseView</p>

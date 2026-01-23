@@ -55,6 +55,44 @@ function signOutHandler(token) {
   synchronizeView();
 }
 
+function loadUserData() {
+  const token = localStorage.getItem("token");
+  const response = serverstub.getUserDataByToken(token);
+  if (response.success) {
+    const user = response.data;
+    const infoContainer = document.getElementById("personalInfo");
+    infoContainer.innerHTML = `
+      <p>Name: ${user.firstname} ${user.familyname}</p>
+      <p>Email: ${user.email}</p>
+      <p>Gender: ${user.gender}</p>
+      <p>City: ${user.city}</p>
+      <p>Country: ${user.country}</p>
+    `;
+  }
+}
+
+function reloadWall() {
+  const token = localStorage.getItem("token");
+  const response = serverstub.getUserMessagesByToken(token);
+  if (response.success) {
+    const messages = response.data;
+    const wallContainer = document.getElementById("wallMessages");
+    wallContainer.innerHTML = messages.map(msg => `<div><strong>${msg.writer}:</strong> ${msg.content}</div>`).join("");
+  }
+}
+
+function postMessageToWall() {
+  const input = document.getElementById("messageInput");
+  const content = input.value;
+  if (content.trim() === "") return;
+
+  const token = localStorage.getItem("token");
+  if (serverstub.postMessage(token, content, null).success) {
+    input.value = "";
+    reloadWall();
+  }
+}
+
 function refreshView(viewId, content) {
   const container = document.getElementById(viewId);
   container.innerHTML = content;
@@ -80,6 +118,8 @@ function synchronizeView() {
     if (!document.getElementById("loggedInView")) {
       const content = document.getElementById('loggedInViewTemplate').innerHTML;
       refreshView('viewContainer', content);
+      loadUserData();
+      reloadWall();
     }
 
     const activeTab = getActiveTab();
