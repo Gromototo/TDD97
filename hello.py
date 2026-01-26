@@ -1,179 +1,212 @@
 from flask import Flask, request
 import uuid
+import sqlite3
+import json
+
 app = Flask(__name__)
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+def init_db():
+    with sqlite3.connect('database.db') as connect:
+        connect.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS user (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL,
+            firstname TEXT,
+            lastname TEXT,
+            gender TEXT,
+            city TEXT,
+            country TEXT,
+            messages TEXT,
+            token TEXT
+        );''')
+        connect.commit()
 
-@app.route('/signin', methods=['GET'])
+init_db()
+
+
+
+@app.route('/sign_in', methods=['POST'])
 def signIn():
-    email = request.args.get('email')
-    password = request.args.get('password')
+    data = request.get_json()
+    email = data.get('username')
+    password = data.get('password')
 
-    #HERE WE NEED TO CHECK IF THE USER IS IN THE DATABASE
+    with sqlite3.connect("database.db") as users:
+        users.row_factory = sqlite3.Row
+        cursor = users.cursor()
+        cursor.execute("SELECT password FROM user WHERE username = ?", (email,))
+        user_data = cursor.fetchone()
 
-    #AND IF THE PASSWORD IS CORRECT.
+        if user_data and user_data['password'] == password:
+            token = str(uuid.uuid4())
+            cursor.execute("UPDATE user SET token = ? WHERE username = ?", (token, email))
+            users.commit()
+            return {"success": True, "message": "Successfully signed in.", "data": token}
 
-        #return {"success": true, "message": "Successfully signed in.", "data": token};
-
-    #IF one of the conditions is false we end up here, return {"success": false, "message": "Wrong username or password."};
-
-    return {
-        "token": str(uuid.uuid4()),
-    }
+    return {"success": False, "message": "Wrong username or password."}
 
 
-@app.route('/signup', methods=['GET'])
+@app.route('/sign_up', methods=['POST'])
 def signUp():
-    email = request.args.get('email')
-    password = request.args.get('password')
-    passwordConfirmaiton = request.args.get('passwordConfirmation')
-    firstName = request.args.get('firstName')
-    lastName = request.args.get('lastName')
-    gender = request.args.get('gender')
-    city = request.args.get('city')
-    country = request.args.get('country')
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    firstName = data.get('firstname')
+    lastName = data.get('familyname')
+    gender = data.get('gender')
+    city = data.get('city')
+    country = data.get('country')
     
+    if not (email and password and firstName and lastName and gender and city and country):
+        return {"success": False, "message": "Form data missing or incorrect type."}
 
-    #We need to check that all fiels are present
+    with sqlite3.connect("database.db") as users:
+        cursor = users.cursor()
+        cursor.execute("SELECT username FROM user WHERE username = ?", (email,))
+        if cursor.fetchone():
+            return {"success": False, "message": "User already exists."}
 
-        #if not return {"success": true, "message": "Form data missing or incorrect type."};
+        cursor.execute("INSERT INTO user \
+        (username,password,firstname,lastname,gender,city,country) VALUES (?,?,?,?,?,?,?)", (email, password, firstName, lastName, gender, city, country))
+        users.commit()
 
-    #HERE WE NEED TO CHECK IF THE email alredy exists
-        #If YES,  return {"success": false, "message": "User already exists."}
-        
-    #Try to create user in the databse if successful 
-    #            return {"success": true, "message": "Successfully created a new user."};
+    return {"success": True, "message": "Successfully created a new user."}
 
-    
-    return {
-        "token": str(uuid.uuid4()),
-    }
-
-@app.route('/signout', methods=['GET'])
+@app.route('/sign_out', methods=['DELETE'])
 def signOut():
-    email = request.args.get('token')
+    token = request.headers.get('Authorization')
 
-    """    
-      syncStorage();
-      if (loggedInUsers[token] != null){
-        delete loggedInUsers[token];
-        persistLoggedInUsers();
-        return {"success": true, "message": "Successfully signed out."};
-      } else {
-        return {"success": false, "message": "You are not signed in."};
-      }
-    """
+    with sqlite3.connect("database.db") as users:
+        cursor = users.cursor()
+        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
+        if cursor.fetchone():
+            cursor.execute("UPDATE user SET token = NULL WHERE token = ?", (token,))
+            users.commit()
+            return {"success": True, "message": "Successfully signed out."}
 
-@app.route('/changePassword', methods=['GET'])
+    return {"success": False, "message": "You are not signed in."}
+
+@app.route('/change_password', methods=['PUT'])
 def changePassword():
-    email = request.args.get('email')
-    oldPassword = request.args.get('oldPassword')
-    newPassword = request.args.get('newPassword')   
+    token = request.headers.get('Authorization')
+    data = request.get_json()
+    oldPassword = data.get('oldpassword')
+    newPassword = data.get('newpassword')
 
-    """
-        syncStorage();
-      if (loggedInUsers[token] != null){
-        var email = tokenToEmail(token);
-        if (users[email].password == oldPassword){
-          users[email].password = newPassword;
-          persistUsers();
-          return {"success": true, "message": "Password changed."};
-        } else {
-          return {"success": false, "message": "Wrong password."};
-        }
-      } else {
-        return {"success": false, "message": "You are not logged in."};
-      }
-    }"""
+    with sqlite3.connect("database.db") as users:
+        users.row_factory = sqlite3.Row
+        cursor = users.cursor()
+        cursor.execute("SELECT username, password FROM user WHERE token = ?", (token,))
+        user = cursor.fetchone()
 
-@app.route('/getUserDataByToken', methods=['GET'])
+        if user:
+            if user['password'] == oldPassword:
+                cursor.execute("UPDATE user SET password = ? WHERE token = ?", (newPassword, token))
+                users.commit()
+                return {"success": True, "message": "Password changed."}
+            else:
+                return {"success": False, "message": "Wrong password."}
+
+    return {"success": False, "message": "You are not logged in."}
+
+@app.route('/get_user_data_by_token', methods=['GET'])
 def getUserDataByToken():
-    token = request.args.get('token')
+    token = request.headers.get('Authorization')
 
-    """
-          var email = tokenToEmail(token);
+    with sqlite3.connect("database.db") as users:
+        users.row_factory = sqlite3.Row
+        cursor = users.cursor()
+        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
+        user = cursor.fetchone()
+        if user:
+            return getUserDataByEmail(user['username'], token)
+    
+    return {"success": False, "message": "You are not signed in."}
 
-          return serverstub.getUserDataByEmail(token, email);
-    """
+@app.route('/get_user_data_by_email/<email>', methods=['GET'])
+def getUserDataByEmail(email, token=None):
+    if not token:
+        token = request.headers.get('Authorization')
 
-@app.route('/getUserDataByEmail', methods=['GET'])
-def getUserDataByEmail():
-    token = request.args.get('token')
-    email = request.args.get('email')
+    with sqlite3.connect("database.db") as users:
+        users.row_factory = sqlite3.Row
+        cursor = users.cursor()
+        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
+        if cursor.fetchone():
+            cursor.execute("SELECT username, firstname, lastname, gender, city, country FROM user WHERE username = ?", (email,))
+            data = cursor.fetchone()
+            if data:
+                return {"success": True, "message": "User data retrieved.", "data": dict(data)}
+            return {"success": False, "message": "No such user."}
 
-    """
-        syncStorage();
-            if (loggedInUsers[token] != null){
-                if (users[email] != null) {
-                var match = copyUser(users[email]);
-                delete match.messages;
-                delete match.password;
-                return {"success": true, "message": "User data retrieved.", "data": match};
-                } else {
-                return {"success": false, "message": "No such user."};
-                }
-            } else {
-                return {"success": false, "message": "You are not signed in."};
-            }
-            },
-    """
+    return {"success": False, "message": "You are not signed in."}
 
-@app.route('/getUserMessagesByToken', methods=['GET'])
+@app.route('/get_user_messages_by_token', methods=['GET'])
 def getUserMessagesByToken():
-    token = request.args.get('token')
+    token = request.headers.get('Authorization')
 
-    """
-        syncStorage();
-      var email = tokenToEmail(token);
-      return serverstub.getUserMessagesByEmail(token,email);
-    """
+    with sqlite3.connect("database.db") as users:
+        users.row_factory = sqlite3.Row
+        cursor = users.cursor()
+        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
+        user = cursor.fetchone()
+        if user:
+            return getUserMessagesByEmail(user['username'], token)
 
-@app.route('/getUserMessagesByEmail', methods=['GET'])
-def getUserMessagesByEmail():
-    token = request.args.get('token')
+    return {"success": False, "message": "You are not signed in."}
 
-    """
-	syncStorage();
-      if (loggedInUsers[token] != null){
-        if (users[email] != null) {
-          var match = copyUser(users[email]).messages;
-          return {"success": true, "message": "User messages retrieved.", "data": match};
-        } else {
-          return {"success": false, "message": "No such user."};
-        }
-      } else {
-        return {"success": false, "message": "You are not signed in."};
-      }
-    """
+@app.route('/get_user_messages_by_email/<email>', methods=['GET'])
+def getUserMessagesByEmail(email, token=None):
+    if not token:
+        token = request.headers.get('Authorization')
 
-@app.route('/postMessage', methods=['GET'])
+    with sqlite3.connect("database.db") as users:
+        users.row_factory = sqlite3.Row
+        cursor = users.cursor()
+        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
+        if cursor.fetchone():
+            cursor.execute("SELECT messages FROM user WHERE username = ?", (email,))
+            data = cursor.fetchone()
+            if data:
+                messages = json.loads(data['messages']) if data['messages'] else []
+                return {"success": True, "message": "User messages retrieved.", "data": messages}
+            return {"success": False, "message": "No such user."}
+
+    return {"success": False, "message": "You are not signed in."}
+
+@app.route('/post_message', methods=['POST'])
 def postMessage():
-    token = request.args.get('token')
-    email = request.args.get('email')
-    message = request.args.get('message')
+    token = request.headers.get('Authorization')
+    data = request.get_json()
+    email = data.get('email')
+    message = data.get('message')
 
-    """
-       syncStorage();
-      var fromEmail = tokenToEmail(token);
-      if (fromEmail != null) {
-        if (toEmail == null) {
-          toEmail = fromEmail;
-        }
-        if(users[toEmail] != null){
-          var recipient = users[toEmail];
-          var message = {"writer": fromEmail, "content": content};
-          recipient.messages.unshift(message);
-          persistUsers();
-          return {"success": true, "message": "Message posted"};
-        } else {
-          return {"success": false, "message": "No such user."};
-        }
-      } else {
-        return {"success": false, "message": "You are not signed in."};
-      }
-      """
+
+    with sqlite3.connect("database.db") as users:
+        users.row_factory = sqlite3.Row
+        cursor = users.cursor()
+        
+        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
+        sender = cursor.fetchone()
+        
+        if sender:
+            from_email = sender['username']
+            to_email = email if email else from_email
+            
+            cursor.execute("SELECT messages FROM user WHERE username = ?", (to_email,))
+            recipient = cursor.fetchone()
+            
+            if recipient:
+                current_messages = json.loads(recipient['messages']) if recipient['messages'] else []
+                new_message = {"writer": from_email, "content": message}
+                current_messages.insert(0, new_message)
+                
+                cursor.execute("UPDATE user SET messages = ? WHERE username = ?", (json.dumps(current_messages), to_email))
+                users.commit()
+                return {"success": True, "message": "Message posted"}
+            else:
+                return {"success": False, "message": "No such user."}
+
+    return {"success": False, "message": "You are not signed in."}
 
 if __name__ == '__main__':
-    app.run(debug=True);
+    app.run(debug=True, port=5000)
