@@ -103,7 +103,7 @@
         <button onclick="postMessageToWall()">Post</button>
       </div>
       <div>
-        <button onclick="reloadWall()">Reload Wall</button>
+        <button onclick="reloadWall(localStorage.getItem('token'), null, 'wallMessages')">Reload Wall</button>
         <div id="wallMessages"></div>
       </div>
     </div>
@@ -115,6 +115,10 @@
       </div>
       <div id="browseProfile" style="display: none;">
         <div id="browsePersonalInfo"></div>
+        <div>
+          <textarea id="browseMessageInput" placeholder="Write something on his wall..."></textarea>
+          <button onclick="postMessageToWall(currentBrowseEmail)">Post</button>
+        </div>
         <div>
           <button onclick="reloadWall(localStorage.getItem('token'), currentBrowseEmail, 'browseWallMessages')">Reload Wall</button>
           <div id="browseWallMessages"></div>

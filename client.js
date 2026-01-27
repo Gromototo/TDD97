@@ -89,13 +89,19 @@ function reloadWall(token, email, containerId) {
   }
 }
 
-function postMessageToWall() {
-  const input = document.getElementById("messageInput");
+function postMessageToWall(email = null) {
+  const input = email ? document.getElementById("browseMessageInput") : document.getElementById("messageInput");
   const content = input.value;
   if (content.trim() === "") return;
 
   const token = localStorage.getItem("token");
-  if (serverstub.postMessage(token, content, null).success) {
+  if (email) {
+
+    if (serverstub.postMessage(token, content, email).success) {
+      input.value = "";
+      reloadWall(token, email, "browseWallMessages");
+    }
+  } else if (serverstub.postMessage(token, content, null).success) {
     input.value = "";
     reloadWall(token, null, "wallMessages");
   }
