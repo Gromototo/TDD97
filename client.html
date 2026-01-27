@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html>
-<head></head>
+<html lang="en">
+<head>
+  <title>TWIDDER</title>
   <link rel="stylesheet" type="text/css" href="client.css">
   <script src="client.js"></script>
   <script src="serverstub.js"></script>
-</head>
-<script>
+  <script>
   window.onload = synchronizeView;
 </script>
 <script id="welcomeView" type="text/html">
@@ -77,19 +77,21 @@
 <script id="headerViewTemplate" type="text/html">
     <div>
       <fieldset>
-        <div>
-          <input type="radio" id="home" name="tab" value="homeView" onclick="synchronizeView()" checked="checked"/>
-          <label for="home">Home</label>
-        </div>
+        <div id = 'tabsDiv'>
+          <div>
+            <input type="radio" id="home" name="tab" value="homeView" onclick="synchronizeView()" checked="checked"/>
+            <label for="home">Home</label>
+          </div>
 
-        <div>
-          <input type="radio" id="browse" name="tab" value="browseView" onclick="synchronizeView()" />
-          <label for="browse">Browse</label>
-        </div>
+          <div>
+            <input type="radio" id="browse" name="tab" value="browseView" onclick="synchronizeView()" />
+            <label for="browse">Browse</label>
+          </div>
 
-        <div>
-          <input type="radio" id="account" name="tab" value="accountView" onclick="synchronizeView()" />
-          <label for="account">Account</label>
+          <div>
+            <input type="radio" id="account" name="tab" value="accountView" onclick="synchronizeView()" />
+            <label for="account">Account</label>
+          </div>
         </div>
       </fieldset>
   </div>
@@ -150,10 +152,9 @@
     </div>
   </div>
 </script>
-
+</head>
 <body>
   <div id="headerContainer"></div>
   <div id="viewContainer"></div>
 </body>
-
 </html>
