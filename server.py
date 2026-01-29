@@ -86,11 +86,11 @@ def signUp():
 def signOut():
     token = request.headers.get('Authorization')
 
-    if db.getUserByToken(token):
-        with sqlite3.connect("database.db") as users:
-            cursor = users.cursor()
-            cursor.execute("UPDATE user SET token = NULL WHERE token = ?", (token,))
-            users.commit()
+    with sqlite3.connect("database.db") as users:
+        cursor = users.cursor()
+        cursor.execute("UPDATE user SET token = NULL WHERE token = ?", (token,))
+        users.commit()
+        if cursor.rowcount > 0:
             return {"success": True, "message": "Successfully signed out."}
 
     return {"success": False, "message": "You are not signed in."}
