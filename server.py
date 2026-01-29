@@ -106,15 +106,16 @@ def changePassword():
 
     user =  db.getUserByToken(token)
     if user :
-        with sqlite3.connect("database.db") as users:
-            if user['password'] == oldPassword:
+        data = db.getPasswordByEmail(user['username'])
+        if data and data['password'] == oldPassword:
+            with sqlite3.connect("database.db") as users:
                 cursor = users.cursor()
                 cursor.execute("UPDATE user SET password = ? WHERE token = ?", (newPassword, token))
                 users.commit()
                 return {"success": True, "message": "Password changed."}
-            else:
-                return {"success": False, "message": "Wrong password."}
-
+        else:
+            return {"success": False, "message": "Wrong password."}
+            
     return {"success": False, "message": "You are not logged in."}
 
 @app.route('/get_user_data_by_token', methods=['GET'])
