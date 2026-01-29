@@ -2,6 +2,7 @@ from flask import Flask, request
 import uuid
 import sqlite3
 import json
+import validators
 
 app = Flask(__name__)
 
@@ -45,6 +46,20 @@ def signIn():
     return {"success": False, "message": "Wrong username or password."}
 
 
+
+def assertSingUpData(email, password, firstName, lastName, gender, city, country):
+
+    if not (email and password and firstName and lastName and gender and city and country) :
+        return False
+
+    if not validators.email(email) :
+        return False
+
+    #Given the tests.py we are apparently not expecte"d to send the second password (confirmation) in the payload. 
+    #Therefore we cannot expect it to check that passwords == passwordConfirmation
+
+    return True
+    
 @app.route('/sign_up', methods=['POST'])
 def signUp():
     data = request.get_json()
@@ -56,7 +71,7 @@ def signUp():
     city = data.get('city')
     country = data.get('country')
     
-    if not (email and password and firstName and lastName and gender and city and country):
+    if not assertSingUpData(email, password, firstName, lastName, gender, city, country): 
         return {"success": False, "message": "Form data missing or incorrect type."}
 
     with sqlite3.connect("database.db") as users:
