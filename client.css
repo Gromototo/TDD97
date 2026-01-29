@@ -62,32 +62,24 @@ body {
   grid-template-columns: auto auto auto;
   grid-template-rows: auto;
   float: left;
- 
 }
 
 #tabsDiv input {
-  filter: blur(100px);
+  /* hide radio buttons */
+  display:none;
 }
 
 #tabsDiv label {
   align-items: center;
-  
+  justify-content: center;
 }
 
-#tabsDiv input[id="home"]:checked + label{
-  background-color: rgb(99, 142, 221);
+#tabsDiv input[type="radio"]:checked + label{
+    background-color: grey;
 }
 
-#tabsDiv input[id="browse"]:checked + label{
-  background-color: rgb(99, 142, 221);
-}
-
-#tabsDiv input[id="account"]:checked + label{
-  background-color: rgb(99, 142, 221);
-}
 
 #tabsDiv label {
-  background-color: blue;
   width: 100px;
   height: 30px;
   display: flex;
