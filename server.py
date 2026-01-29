@@ -3,7 +3,7 @@ import uuid
 import sqlite3
 import json
 import validators
-from database_helper import *
+import database_helper as db
 
 app = Flask(__name__)
 
@@ -32,14 +32,13 @@ def signIn():
     email = data.get('username')
     password = data.get('password')
 
-    with sqlite3.connect("database.db") as users:
-        users.row_factory = sqlite3.Row
-        cursor = users.cursor()
-        cursor.execute("SELECT password FROM user WHERE username = ?", (email,))
-        user_data = cursor.fetchone()
+    user_data = db.getPasswordByEmail(email)
 
-        if user_data and user_data['password'] == password:
-            token = str(uuid.uuid4())
+    if user_data and user_data['password'] == password:
+        token = str(uuid.uuid4())
+        with sqlite3.connect("database.db") as users:
+            users.row_factory = sqlite3.Row
+            cursor = users.cursor()
             cursor.execute("UPDATE user SET token = ? WHERE username = ?", (token, email))
             users.commit()
             return {"success": True, "message": "Successfully signed in.", "data": token}
@@ -75,10 +74,13 @@ def signUp():
     if not assertSingUpData(email, password, firstName, lastName, gender, city, country): 
         return {"success": False, "message": "Form data missing or incorrect type."}
 
-    if getUserByEmail(email) :
-        return {"success": False, "message": "User already exists."}
+    print("response froö the emqil auery", db.getUser(email))
+    if db.getUser(email):
+        print("qppqrently user exists")
+        return {"success": False, "message": "User already exists."} 
+    print("qppqrently user DOESN T exists")
 
-    addNewUser(email, password, firstName, lastName, gender, city, country)
+    db.createUser(email, password, firstName, lastName, gender, city, country)
 
     return {"success": True, "message": "Successfully created a new user."}
 
@@ -102,6 +104,9 @@ def changePassword():
     data = request.get_json()
     oldPassword = data.get('oldpassword')
     newPassword = data.get('newpassword')
+    if not (oldPassword and newPassword):
+        return {"success": False, "message": "Invalid new password."}
+
 
     with sqlite3.connect("database.db") as users:
         users.row_factory = sqlite3.Row
@@ -190,6 +195,8 @@ def postMessage():
     data = request.get_json()
     email = data.get('email')
     message = data.get('message')
+    if not (token and data and email and message):
+        return {"success": False, "message": "Invalid payload"}
 
 
     with sqlite3.connect("database.db") as users:
