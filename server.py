@@ -3,6 +3,7 @@ import uuid
 import sqlite3
 import json
 import validators
+from database_helper import *
 
 app = Flask(__name__)
 
@@ -74,15 +75,10 @@ def signUp():
     if not assertSingUpData(email, password, firstName, lastName, gender, city, country): 
         return {"success": False, "message": "Form data missing or incorrect type."}
 
-    with sqlite3.connect("database.db") as users:
-        cursor = users.cursor()
-        cursor.execute("SELECT username FROM user WHERE username = ?", (email,))
-        if cursor.fetchone():
-            return {"success": False, "message": "User already exists."}
+    if getUserByEmail(email) :
+        return {"success": False, "message": "User already exists."}
 
-        cursor.execute("INSERT INTO user \
-        (username,password,firstname,lastname,gender,city,country) VALUES (?,?,?,?,?,?,?)", (email, password, firstName, lastName, gender, city, country))
-        users.commit()
+    addNewUser(email, password, firstName, lastName, gender, city, country)
 
     return {"success": True, "message": "Successfully created a new user."}
 
