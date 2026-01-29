@@ -47,7 +47,7 @@ def signIn():
 
 
 
-def assertSingUpData(email, password, firstName, lastName, gender, city, country):
+def assertSignUpData(email, password, firstName, lastName, gender, city, country):
 
     if not (email and password and firstName and lastName and gender and city and country) :
         return False
@@ -71,14 +71,12 @@ def signUp():
     city = data.get('city')
     country = data.get('country')
     
-    if not assertSingUpData(email, password, firstName, lastName, gender, city, country): 
+    if not assertSignUpData(email, password, firstName, lastName, gender, city, country): 
         return {"success": False, "message": "Form data missing or incorrect type."}
 
-    print("response froö the emqil auery", db.getUser(email))
-    if db.getUser(email):
-        print("qppqrently user exists")
+    if db.getUserByEmail(email):
+
         return {"success": False, "message": "User already exists."} 
-    print("qppqrently user DOESN T exists")
 
     db.createUser(email, password, firstName, lastName, gender, city, country)
 
@@ -88,10 +86,9 @@ def signUp():
 def signOut():
     token = request.headers.get('Authorization')
 
-    with sqlite3.connect("database.db") as users:
-        cursor = users.cursor()
-        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
-        if cursor.fetchone():
+    if db.getUserByToken(token):
+        with sqlite3.connect("database.db") as users:
+            cursor = users.cursor()
             cursor.execute("UPDATE user SET token = NULL WHERE token = ?", (token,))
             users.commit()
             return {"success": True, "message": "Successfully signed out."}
@@ -107,15 +104,11 @@ def changePassword():
     if not (oldPassword and newPassword):
         return {"success": False, "message": "Invalid new password."}
 
-
-    with sqlite3.connect("database.db") as users:
-        users.row_factory = sqlite3.Row
-        cursor = users.cursor()
-        cursor.execute("SELECT username, password FROM user WHERE token = ?", (token,))
-        user = cursor.fetchone()
-
-        if user:
+    user =  db.getUserByToken(token)
+    if user :
+        with sqlite3.connect("database.db") as users:
             if user['password'] == oldPassword:
+                cursor = users.cursor()
                 cursor.execute("UPDATE user SET password = ? WHERE token = ?", (newPassword, token))
                 users.commit()
                 return {"success": True, "message": "Password changed."}
@@ -128,13 +121,9 @@ def changePassword():
 def getUserDataByToken():
     token = request.headers.get('Authorization')
 
-    with sqlite3.connect("database.db") as users:
-        users.row_factory = sqlite3.Row
-        cursor = users.cursor()
-        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
-        user = cursor.fetchone()
-        if user:
-            return getUserDataByEmail(user['username'], token)
+    user = db.getUserByToken(token)
+    if user:
+        return getUserDataByEmail(user['username'], token)
     
     return {"success": False, "message": "You are not signed in."}
 
@@ -143,11 +132,10 @@ def getUserDataByEmail(email, token=None):
     if not token:
         token = request.headers.get('Authorization')
 
-    with sqlite3.connect("database.db") as users:
-        users.row_factory = sqlite3.Row
-        cursor = users.cursor()
-        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
-        if cursor.fetchone():
+    if db.getUserByToken(token):
+        with sqlite3.connect("database.db") as users:
+            users.row_factory = sqlite3.Row
+            cursor = users.cursor()
             cursor.execute("SELECT username, firstname, lastname, gender, city, country FROM user WHERE username = ?", (email,))
             data = cursor.fetchone()
             if data:
@@ -160,13 +148,9 @@ def getUserDataByEmail(email, token=None):
 def getUserMessagesByToken():
     token = request.headers.get('Authorization')
 
-    with sqlite3.connect("database.db") as users:
-        users.row_factory = sqlite3.Row
-        cursor = users.cursor()
-        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
-        user = cursor.fetchone()
-        if user:
-            return getUserMessagesByEmail(user['username'], token)
+    user = db.getUserByToken(token)
+    if user:
+        return getUserMessagesByEmail(user['username'], token)
 
     return {"success": False, "message": "You are not signed in."}
 
@@ -175,11 +159,10 @@ def getUserMessagesByEmail(email, token=None):
     if not token:
         token = request.headers.get('Authorization')
 
-    with sqlite3.connect("database.db") as users:
-        users.row_factory = sqlite3.Row
-        cursor = users.cursor()
-        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
-        if cursor.fetchone():
+    if db.getUserByToken(token):
+        with sqlite3.connect("database.db") as users:
+            users.row_factory = sqlite3.Row
+            cursor = users.cursor()
             cursor.execute("SELECT messages FROM user WHERE username = ?", (email,))
             data = cursor.fetchone()
             if data:
@@ -198,18 +181,14 @@ def postMessage():
     if not (token and data and email and message):
         return {"success": False, "message": "Invalid payload"}
 
+    sender = db.getUserByToken(token)
+    if sender:
+        from_email = sender['username']
+        to_email = email if email else from_email
 
-    with sqlite3.connect("database.db") as users:
-        users.row_factory = sqlite3.Row
-        cursor = users.cursor()
-        
-        cursor.execute("SELECT username FROM user WHERE token = ?", (token,))
-        sender = cursor.fetchone()
-        
-        if sender:
-            from_email = sender['username']
-            to_email = email if email else from_email
-            
+        with sqlite3.connect("database.db") as users:
+            users.row_factory = sqlite3.Row
+            cursor = users.cursor()
             cursor.execute("SELECT messages FROM user WHERE username = ?", (to_email,))
             recipient = cursor.fetchone()
             
