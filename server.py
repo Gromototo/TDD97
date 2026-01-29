@@ -106,6 +106,9 @@ def changePassword():
     data = request.get_json()
     oldPassword = data.get('oldpassword')
     newPassword = data.get('newpassword')
+    if not (oldPassword and newPassword):
+        return {"success": False, "message": "Invalid new password."}
+
 
     with sqlite3.connect("database.db") as users:
         users.row_factory = sqlite3.Row
@@ -194,6 +197,8 @@ def postMessage():
     data = request.get_json()
     email = data.get('email')
     message = data.get('message')
+    if not (token and data and email and message):
+        return {"success": False, "message": "Invalid payload"}
 
 
     with sqlite3.connect("database.db") as users:
