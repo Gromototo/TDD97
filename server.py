@@ -9,20 +9,9 @@ app = Flask(__name__)
 
 def init_db():
     with sqlite3.connect('database.db') as connect:
-        connect.execute(
-            '''
-            CREATE TABLE IF NOT EXISTS user (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL,
-            firstname TEXT,
-            lastname TEXT,
-            gender TEXT,
-            city TEXT,
-            country TEXT,
-            messages TEXT,
-            token TEXT
-        );''')
-        connect.commit()
+        with open('schema.sql', 'r') as f:
+            connect.executescript(f.read())
 
-init_db()
 
 
 
@@ -49,6 +38,9 @@ def assertSignUpData(email, password, firstName, lastName, gender, city, country
         return False
 
     if not validators.email(email) :
+        return False
+
+    if len(password) < 10:
         return False
 
     #Given the tests.py we are apparently not expecte"d to send the second password (confirmation) in the payload. 
@@ -183,4 +175,5 @@ def postMessage():
     return {"success": False, "message": "You are not signed in."}
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True, port=5000)
