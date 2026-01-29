@@ -36,11 +36,7 @@ def signIn():
 
     if user_data and user_data['password'] == password:
         token = str(uuid.uuid4())
-        with sqlite3.connect("database.db") as users:
-            users.row_factory = sqlite3.Row
-            cursor = users.cursor()
-            cursor.execute("UPDATE user SET token = ? WHERE username = ?", (token, email))
-            users.commit()
+        if db.updateUserToken(email, token):
             return {"success": True, "message": "Successfully signed in.", "data": token}
 
     return {"success": False, "message": "Wrong username or password."}
@@ -86,12 +82,8 @@ def signUp():
 def signOut():
     token = request.headers.get('Authorization')
 
-    with sqlite3.connect("database.db") as users:
-        cursor = users.cursor()
-        cursor.execute("UPDATE user SET token = NULL WHERE token = ?", (token,))
-        users.commit()
-        if cursor.rowcount > 0:
-            return {"success": True, "message": "Successfully signed out."}
+    if db.removeUserToken(token):
+        return {"success": True, "message": "Successfully signed out."}
 
     return {"success": False, "message": "You are not signed in."}
 
@@ -108,10 +100,7 @@ def changePassword():
     if user :
         data = db.getPasswordByEmail(user['username'])
         if data and data['password'] == oldPassword:
-            with sqlite3.connect("database.db") as users:
-                cursor = users.cursor()
-                cursor.execute("UPDATE user SET password = ? WHERE token = ?", (newPassword, token))
-                users.commit()
+            if db.updatePassword(token, newPassword):
                 return {"success": True, "message": "Password changed."}
         else:
             return {"success": False, "message": "Wrong password."}
@@ -134,14 +123,10 @@ def getUserDataByEmail(email, token=None):
         token = request.headers.get('Authorization')
 
     if db.getUserByToken(token):
-        with sqlite3.connect("database.db") as users:
-            users.row_factory = sqlite3.Row
-            cursor = users.cursor()
-            cursor.execute("SELECT username, firstname, lastname, gender, city, country FROM user WHERE username = ?", (email,))
-            data = cursor.fetchone()
-            if data:
-                return {"success": True, "message": "User data retrieved.", "data": dict(data)}
-            return {"success": False, "message": "No such user."}
+        data = db.getUserData(email)
+        if data:
+            return {"success": True, "message": "User data retrieved.", "data": dict(data)}
+        return {"success": False, "message": "No such user."}
 
     return {"success": False, "message": "You are not signed in."}
 
@@ -161,15 +146,11 @@ def getUserMessagesByEmail(email, token=None):
         token = request.headers.get('Authorization')
 
     if db.getUserByToken(token):
-        with sqlite3.connect("database.db") as users:
-            users.row_factory = sqlite3.Row
-            cursor = users.cursor()
-            cursor.execute("SELECT messages FROM user WHERE username = ?", (email,))
-            data = cursor.fetchone()
-            if data:
-                messages = json.loads(data['messages']) if data['messages'] else []
-                return {"success": True, "message": "User messages retrieved.", "data": messages}
-            return {"success": False, "message": "No such user."}
+        data = db.getUserMessages(email)
+        if data:
+            messages = json.loads(data['messages']) if data['messages'] else []
+            return {"success": True, "message": "User messages retrieved.", "data": messages}
+        return {"success": False, "message": "No such user."}
 
     return {"success": False, "message": "You are not signed in."}
 
@@ -187,22 +168,17 @@ def postMessage():
         from_email = sender['username']
         to_email = email if email else from_email
 
-        with sqlite3.connect("database.db") as users:
-            users.row_factory = sqlite3.Row
-            cursor = users.cursor()
-            cursor.execute("SELECT messages FROM user WHERE username = ?", (to_email,))
-            recipient = cursor.fetchone()
+        recipient = db.getUserMessages(to_email)
+        
+        if recipient:
+            current_messages = json.loads(recipient['messages']) if recipient['messages'] else []
+            new_message = {"writer": from_email, "content": message}
+            current_messages.insert(0, new_message)
             
-            if recipient:
-                current_messages = json.loads(recipient['messages']) if recipient['messages'] else []
-                new_message = {"writer": from_email, "content": message}
-                current_messages.insert(0, new_message)
-                
-                cursor.execute("UPDATE user SET messages = ? WHERE username = ?", (json.dumps(current_messages), to_email))
-                users.commit()
-                return {"success": True, "message": "Message posted"}
-            else:
-                return {"success": False, "message": "No such user."}
+            db.updateUserMessages(to_email, json.dumps(current_messages))
+            return {"success": True, "message": "Message posted"}
+        else:
+            return {"success": False, "message": "No such user."}
 
     return {"success": False, "message": "You are not signed in."}
 
