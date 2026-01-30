@@ -85,7 +85,12 @@ function reloadWall(token, email, containerId) {
   if (response.success) {
     const messages = response.data;
     const wallContainer = document.getElementById(containerId);
-    wallContainer.innerHTML = messages.map(msg => `<div><strong>${msg.writer}:</strong> ${msg.content}</div>`).join("");
+    wallContainer.innerHTML = messages.map((msg, index) => `
+      <div id="msg_${index}" class="message-bubble">
+        <div class="message-author">${msg.writer}</div>
+        <div class="message-text">${msg.content}</div>
+      </div>`
+    ).join("");
   }
 }
 
