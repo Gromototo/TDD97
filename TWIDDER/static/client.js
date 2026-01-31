@@ -1,4 +1,31 @@
 currentBrowseEmail = null;
+let socket = null;
+
+function connectWebSocket(token) {
+    if (!token || (socket && socket.readyState === WebSocket.OPEN)) {
+        return;
+    }
+    
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    socket = new WebSocket(`${protocol}//${window.location.host}/websocket`);
+
+    socket.onopen = () => {
+        socket.send(JSON.stringify({ token: token }));
+    };
+
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'signout') {
+            signOutHandler(localStorage.getItem("token"));
+        }
+    };
+}
+
+async function init() {
+    await synchronizeView();
+    const token = localStorage.getItem("token");
+    connectWebSocket(token);
+}
 
 function validatePasswordMatch(passwordId, confirmationId) {
   var password = document.getElementById(passwordId).value;
@@ -42,7 +69,9 @@ async function signInHandler(inputObject) {
     submitButton.setCustomValidity(result.message);
     submitButton.reportValidity();
   } else {
-    localStorage.setItem("token", result.data);
+    token = result.data
+    localStorage.setItem("token", token);
+    connectWebSocket(token);
     await synchronizeView();
   }
 }
@@ -75,10 +104,11 @@ async function signOutHandler(token) {
     method: 'DELETE',
     headers: { 'Authorization': token }
   });
-  const result = await response.json();
 
-  if (result.success) {
-    localStorage.removeItem("token");
+  localStorage.removeItem("token");
+  if (socket) {
+      socket.close();
+      socket = null;
   }
   await synchronizeView();
 }
@@ -172,6 +202,9 @@ async function synchronizeView() {
     const response = await fetch('/get_user_data_by_token', { headers: { 'Authorization': token } });
     const result = await response.json();
     isLoggedIn = result.success;
+    if (!isLoggedIn) {
+      localStorage.removeItem("token");
+    }
   }
 
   if (isLoggedIn) {

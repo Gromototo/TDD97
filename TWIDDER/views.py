@@ -1,9 +1,41 @@
-from TWIDDER import app
+from TWIDDER import app, sock
 from flask import render_template, request
 import uuid
 import json
 import validators
 from . import database_helper as db
+
+active_connections = {}
+
+def forceDisconnectDistantUser(email):
+    if email in active_connections:
+        try:
+            active_connections[email].send(json.dumps({"type": "signout"}))
+        except:
+            pass
+        active_connections.pop(email, None)
+
+@sock.route('/websocket')
+def websocket(ws):
+    email = None
+    try:
+        data = ws.receive()
+        if data:
+            message = json.loads(data)
+            token = message.get('token')
+            
+            user = db.getUserByToken(token)
+            if user:
+                email = user['username']
+                active_connections[email] = ws
+                
+                while True:
+                    ws.receive()
+    except:
+        pass
+    finally:
+        if email and email in active_connections and active_connections[email] == ws:
+            del active_connections[email]
 
 @app.route('/')
 def index():
@@ -20,6 +52,7 @@ def signIn():
     if user_data and user_data['password'] == password:
         token = str(uuid.uuid4())
         if db.updateUserToken(email, token):
+            forceDisconnectDistantUser(email)
             return {"success": True, "message": "Successfully signed in.", "data": token}
 
     return {"success": False, "message": "Wrong username or password."}
@@ -85,6 +118,7 @@ def changePassword():
         data = db.getPasswordByEmail(user['username'])
         if data and data['password'] == oldPassword:
             if db.updatePassword(token, newPassword):
+                forceDisconnectDistantUser(user['username'])
                 return {"success": True, "message": "Password changed."}
         else:
             return {"success": False, "message": "Wrong password."}

@@ -1,7 +1,9 @@
 from flask import Flask
+from flask_sock import Sock
 import sqlite3
 
 app = Flask(__name__)
+sock = Sock(app)
 
 import TWIDDER.views
 
