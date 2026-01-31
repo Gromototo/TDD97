@@ -11,79 +11,112 @@ function validatePasswordMatch(passwordId, confirmationId) {
   }
 }
 
-function signUpHandler(inputObject) {
-  var signup = serverstub.signUp(inputObject);
-  if (!signup.success) {
+async function signUpHandler(inputObject) {
+  const response = await fetch('/sign_up', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(inputObject)
+  });
+  const result = await response.json();
+
+  if (!result.success) {
     var submitButton = document.querySelector("#signup .submitButton");
-    submitButton.setCustomValidity(signup.message)
+    submitButton.setCustomValidity(result.message)
     submitButton.reportValidity();
   }
   else {
-    var login = serverstub.signIn(inputObject.email, inputObject.password);
-    localStorage.setItem("token", login.data);
-    synchronizeView();
+    await signInHandler(inputObject);
   }
 }
 
-function signInHandler(inputObject) {
-  var response = serverstub.signIn(inputObject.email, inputObject.password);
+async function signInHandler(inputObject) {
+  const response = await fetch('/sign_in', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: inputObject.email, password: inputObject.password })
+  });
+  const result = await response.json();
   
-  if (!response.success) {
+  if (!result.success) {
     var submitButton = document.querySelector("#login .submitButton");
-    submitButton.setCustomValidity(response.message);
+    submitButton.setCustomValidity(result.message);
     submitButton.reportValidity();
   } else {
-    localStorage.setItem("token", response.data);
-    synchronizeView();
+    localStorage.setItem("token", result.data);
+    await synchronizeView();
   }
 }
 
-function changePasswordHandler(inputObject) {
-  var response = serverstub.changePassword(inputObject.token, inputObject.oldPassword, inputObject.newPassword);
-  if (response.success) {
+async function changePasswordHandler(inputObject) {
+  const response = await fetch('/change_password', {
+    method: 'PUT',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': inputObject.token 
+    },
+    body: JSON.stringify({ 
+      oldpassword: inputObject.oldPassword, 
+      newpassword: inputObject.newPassword 
+    })
+  });
+  const result = await response.json();
+
+  if (result.success) {
      document.querySelector("#changePasword form").reset();
   }
 
   var submitButton = document.querySelector("#changePasword .submitButton");
-  submitButton.setCustomValidity(response.message);
+  submitButton.setCustomValidity(result.message);
   submitButton.reportValidity();
 }
 
-function signOutHandler(token) {
-  var response = serverstub.signOut(token);
-  if (response.success) {
+async function signOutHandler(token) {
+  const response = await fetch('/sign_out', {
+    method: 'DELETE',
+    headers: { 'Authorization': token }
+  });
+  const result = await response.json();
+
+  if (result.success) {
     localStorage.removeItem("token");
   }
-  synchronizeView();
+  await synchronizeView();
 }
 
-function loadUserData(token, email, containerId) {
+async function loadUserData(token, email, containerId) {
   const loggedInToken = localStorage.getItem("token");
-  let response;
-  if (email) {
-    response = serverstub.getUserDataByEmail(loggedInToken, email);
-  } else {
-    response = serverstub.getUserDataByToken(token);
-  }
-  if (response.success) {
-    const user = response.data;
+  let url = email ? `/get_user_data_by_email/${email}` : '/get_user_data_by_token';
+  
+  const response = await fetch(url, {
+    headers: { 'Authorization': loggedInToken || token }
+  });
+  const result = await response.json();
+
+  if (result.success) {
+    const user = result.data;
     const infoContainer = document.getElementById(containerId);
     infoContainer.innerHTML = `
-      <p>Name: ${user.firstname} ${user.familyname}</p>
-      <p>Email: ${user.email}</p>
+      <p>Name: ${user.firstname} ${user.lastname}</p>
+      <p>Email: ${user.username}</p>
       <p>Gender: ${user.gender}</p>
       <p>City: ${user.city}</p>
       <p>Country: ${user.country}</p>
     `;
     return true;
   }
-  return response.message;
+  return result.message;
 }
 
-function reloadWall(token, email, containerId) {
-  const response = email ? serverstub.getUserMessagesByEmail(token, email) : serverstub.getUserMessagesByToken(token);
-  if (response.success) {
-    const messages = response.data;
+async function reloadWall(token, email, containerId) {
+  let url = email ? `/get_user_messages_by_email/${email}` : '/get_user_messages_by_token';
+  
+  const response = await fetch(url, {
+    headers: { 'Authorization': token }
+  });
+  const result = await response.json();
+
+  if (result.success) {
+    const messages = result.data;
     const wallContainer = document.getElementById(containerId);
     wallContainer.innerHTML = messages.map((msg, index) => `
       <div id="msg_${index}" class="message-bubble">
@@ -94,23 +127,30 @@ function reloadWall(token, email, containerId) {
   }
 }
 
-function postMessageToWall(email = null) {
+async function postMessageToWall(email = null) {
   const input = email ? document.getElementById("browseMessageInput") : document.getElementById("messageInput");
   const content = input.value;
   if (content.trim() === "") return;
 
   const token = localStorage.getItem("token");
-  if (email) {
+  
+  const response = await fetch('/post_message', {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': token 
+    },
+    body: JSON.stringify({ email: email, message: content })
+  });
+  const result = await response.json();
 
-    if (serverstub.postMessage(token, content, email).success) {
-      input.value = "";
-      reloadWall(token, email, "browseWallMessages");
-    }
-  } else if (serverstub.postMessage(token, content, null).success) {
+  if (result.success) {
     input.value = "";
-    reloadWall(token, null, "wallMessages");
+    const wallId = email ? "browseWallMessages" : "wallMessages";
+    await reloadWall(token, email, wallId);
   }
 }
+
 
 function refreshView(viewId, content) {
   const container = document.getElementById(viewId);
@@ -124,9 +164,15 @@ function getActiveTab() {
   return activeTab;
 }
 
-function synchronizeView() {
+async function synchronizeView() {
   const token = localStorage.getItem("token");
-  const isLoggedIn = token && serverstub.getUserDataByToken(token).success;
+  let isLoggedIn = false;
+
+  if (token) {
+    const response = await fetch('/get_user_data_by_token', { headers: { 'Authorization': token } });
+    const result = await response.json();
+    isLoggedIn = result.success;
+  }
 
   if (isLoggedIn) {
     if (document.getElementById("headerContainer").innerHTML === "") {
@@ -137,8 +183,8 @@ function synchronizeView() {
     if (!document.getElementById("loggedInView")) {
       const content = document.getElementById('loggedInViewTemplate').innerHTML;
       refreshView('viewContainer', content);
-      loadUserData(token, null, "personalInfo");
-      reloadWall(token, null, "wallMessages");
+      await loadUserData(token, null, "personalInfo");
+      await reloadWall(token, null, "wallMessages");
     }
 
     const activeTab = getActiveTab();
@@ -154,7 +200,7 @@ function synchronizeView() {
   }
 }
 
-function handleBrowseSearch() {
+async function handleBrowseSearch() {
   const emailInput = document.getElementById("browseEmail");
   if (!emailInput.checkValidity()) {
     emailInput.reportValidity();
@@ -165,11 +211,11 @@ function handleBrowseSearch() {
   const resultContainer = document.getElementById("browseProfile");
   const searchButton = document.getElementById("browseSearchButton");
 
-  const result = loadUserData(null, email, "browsePersonalInfo");
+  const result = await loadUserData(null, email, "browsePersonalInfo");
   if (result === true) {
     currentBrowseEmail = email;
     resultContainer.style.display = "block";
-    reloadWall(localStorage.getItem("token"), email, "browseWallMessages");
+    await reloadWall(localStorage.getItem("token"), email, "browseWallMessages");
     searchButton.setCustomValidity("");
   } else {
     resultContainer.style.display = "none";
