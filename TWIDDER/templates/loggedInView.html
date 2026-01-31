@@ -1,0 +1,54 @@
+<div id="loggedInView">
+  <div id="homeView">
+    <div id="personalInfo"></div>
+    <div>
+      <textarea id="messageInput" placeholder="Write on your wall..."></textarea>
+      <button onclick="postMessageToWall()">Post</button>
+    </div>
+    <div>
+      <button onclick="reloadWall(localStorage.getItem('token'), null, 'wallMessages')">Reload Wall</button>
+      <div id="wallMessages"></div>
+    </div>
+  </div>
+  <div id="browseView">
+    <div oninput="document.getElementById('browseSearchButton').setCustomValidity('')">
+      <label for="browseEmail">User email:</label>
+      <input type="email" id="browseEmail" name="browseEmail" required>
+      <button id="browseSearchButton" onclick="handleBrowseSearch()">Search</button>
+    </div>
+    <div id="browseProfile" style="display: none;">
+      <div id="browsePersonalInfo"></div>
+      <div>
+        <textarea id="browseMessageInput" placeholder="Write something on his wall..."></textarea>
+        <button onclick="postMessageToWall(currentBrowseEmail)">Post</button>
+      </div>
+      <div>
+        <button onclick="reloadWall(localStorage.getItem('token'), currentBrowseEmail, 'browseWallMessages')">Reload Wall</button>
+        <div id="browseWallMessages"></div>
+      </div>
+    </div>
+  </div>
+  <div id="accountView">
+    <p>accountView</p>
+    <div id="changePasword" >
+      <form oninput="this.querySelector('.submitButton').setCustomValidity('')" onsubmit="changePasswordHandler({token : localStorage.getItem('token'), oldPassword: this.oldPassword.value, newPassword: this.newPassword.value}); return false;">
+        <div class="formLabelInput">
+        <label for="oldPassword">Old password</label>
+        <input type="password" id="oldPassword" minlength="10" name="oldPassword" required>
+        </div>
+        <div class="formLabelInput">
+        <label for="newPassword">New password</label>
+        <input type="password" minlength="10" id="newPassword" name="newPassword" required>
+        </div>
+        <div class="formLabelInput">
+        <label for="newPasswordRepeat">Repeat new password</label>
+        <input type="password" minlength="10" id="newPasswordRepeat" name="newPasswordRepeat" required oninput="validatePasswordMatch('newPassword', 'newPasswordRepeat')">
+        </div>
+        <input class= "submitButton" type="submit"  value="Submit">
+      </form>
+    </div>
+    <div id="logoutDiv">
+      <button id="logoutButton" onclick="signOutHandler(localStorage.getItem('token'))">Log out</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,65 @@
+<div id="welcomeContainer">
+  <div>
+    <img  id = "welcomeLogo" src="static/images/wimage.png" alt="twidder logo with text Twidder socialize woth other people around the world" width="340" height="400">
+  </div>
+  <div id="forms">
+    <div id="login" >
+      <form oninput="this.querySelector('.submitButton').setCustomValidity('')" onsubmit="signInHandler({email: this.email.value, password: this.password.value}); return false;">
+        <div class="formLabelInput">
+        <label for="email">email</label>
+        <input type="email" id="email" name="email" required>
+        </div>
+        <div class="formLabelInput">
+        <label for="password">password</label>
+        <input type="password" minlength="10" id="password" name="password" required>
+        </div>
+        <input class= "submitButton" type="submit"  value="Submit">
+      </form>
+    </div>
+    <div id="signupDiv">
+      <div id = "signupLabel">
+        <label>signup here</label>
+      </div>
+      <form id="signup" oninput="this.querySelector('.submitButton').setCustomValidity('')" onsubmit="signUpHandler({email: this.email.value, password: this.password.value, firstname: this.firstName.value, familyname: this.familyName.value, gender: this.genders.value, city: this.city.value, country: this.country.value}); return false;">
+        <div class="formLabelInput">
+        <label for="signup_email">email</label>
+        <input type="email" id="signup_email" name="email" required>
+        </div>
+        <div class="formLabelInput">
+        <label for="password">password</label>
+        <input type="password" minlength="10" id="signup_password" name="password" required>
+        </div>
+        <div class="formLabelInput">
+        <label for="signup_passwordConfirmation">confirm password</label>
+        <input type="password" minlength="10"  oninput="validatePasswordMatch('signup_password', 'signup_passwordConfirmation')" id="signup_passwordConfirmation" name="passwordConfirmation" required>
+        </div>
+        <div class="formLabelInput">
+        <label for="firstName">firstName</label>
+        <input type="text" id="firstName" name="firstName" required>
+        </div>
+        <div class="formLabelInput">
+        <label for="familyName">familyName</label>
+        <input type="text" id="familyName" name="familyName" required>
+        </div>
+        <div class="formLabelInput">
+        <label for="genders">Choose a gender:</label>
+        <select name="genders" id="genders" required>
+          <option value="">Select a gender...</option>
+          <option value="male">male</option>
+          <option value="female">female</option>
+        </select>
+        </div>
+        <div class="formLabelInput">
+        <label for="city">city</label>
+        <input type="text" id="city" name="city" required>
+        </div>
+        <div class="formLabelInput">
+                  <label for="country">country</label>
+
+        <input type="text" id="country" name="country" required>
+        </div>
+        <input class="submitButton" type="submit"  value="Submit">
+      </form>
+    </div>
+  </div>
+</div>
